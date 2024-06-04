@@ -88,11 +88,11 @@ export class RyanairService {
         const faresEnd = await this.getFares(commonDestination.code, destination.code, dateInterval[0]);
         for (const fareStart of faresStart) {
           if (fareStart.soldOut || fareStart.unavailable) continue;
-          if (fareStart.departureDate < dateInterval[0] || fareStart.departureDate > dateInterval[1]) continue;
+          if (new Date(fareStart.departureDate) < dateInterval[0] || new Date(fareStart.departureDate) > dateInterval[1]) continue;
           for (const fareEnd of faresEnd) {
             if (fareEnd.soldOut || fareEnd.unavailable) continue;
-            if (fareEnd.departureDate < dateInterval[0] || fareEnd.departureDate > dateInterval[1]) continue;
-            if (fareEnd.departureDate < fareStart.arrivalDate) continue;
+            if (new Date(fareEnd.departureDate) < dateInterval[0] || new Date(fareEnd.departureDate) > dateInterval[1]) continue;
+            if (new Date(fareEnd.departureDate) < new Date(fareStart.arrivalDate)) continue;
             flights.push({
               startAirport: origin,
               middleAirport: commonDestination,

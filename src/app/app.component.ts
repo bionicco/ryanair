@@ -21,6 +21,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { SliderModule } from 'primeng/slider';
 import { TabViewModule } from 'primeng/tabview';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { TimePipe } from './time.pipe';
 
 
 const ONE_MINUTE = 60 * 1000;
@@ -47,11 +48,12 @@ const ONE_HOUR = 60 * ONE_MINUTE;
     AccordionModule,
     SliderModule,
     TabViewModule,
-    SelectButtonModule
+    SelectButtonModule,
+    TimePipe
   ],
   providers: [
     BrowserModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -140,6 +142,10 @@ export class AppComponent implements OnInit {
 
   timeOfFlightHours(flight: Flight): number {
     return (new Date(flight.fareLast.arrivalDate).getTime() - new Date(flight.fareFirst.departureDate).getTime()) / ONE_HOUR;
+  }
+
+  timeOfWaitHours(flight: Flight): number {
+    return (new Date(flight.fareLast.departureDate).getTime() - new Date(flight.fareFirst.arrivalDate).getTime()) / ONE_HOUR;
   }
 
   durationOfFare(fare: Fare): string {
