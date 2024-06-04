@@ -24,10 +24,10 @@
   @if(connectionVerified && origin && destination && origin.code != destination.code){
   <div class="common-routes">
     @if(connected){
-    <h2>i due aeroporti sono direttamente connessi </h2>
+    <h2>I due aeroporti sono direttamente connessi </h2>
     }@else{
     @if(commonDestinations.length > 0){
-    <h2>i due aeroporti sono connessi tramite questi scali</h2>
+    <h2>I due aeroporti sono connessi tramite questi scali</h2>
     @for(airport of commonDestinations; track airport.code){
     <p-toggleButton class="common-routes-button" [(ngModel)]="airport.selected"
       (ngModelChange)="changeSelectedDestinations()" [onLabel]="airport.name" [offLabel]="airport.name" />
@@ -75,6 +75,8 @@
           <h3>Durata massima <b>{{filterLength}}</b> ore</h3>
           <p-slider [(ngModel)]="filterLength" [min]="0" [max]="48" [step]="1" [style]="{ width: '100%' }"
             (onSlideEnd)="filterFlights()" />
+          <h3>Ordina per</h3>
+          <p-selectButton [options]="sortByOptions" [(ngModel)]="sortBy" (ngModelChange)="filterFlights()" />
         </div>
       </p-accordionTab>
     </p-accordion>
@@ -136,11 +138,41 @@
 
 <ng-template #searchResultsPanel let-flight="flight">
 
-  <p-card [header]="flight.middleAirport?.name || 'diretto'">
-    <h5>
-      {{flight.fareFirst.departureDate | date:"dd/MM/yy HH:mm" }} -
-      {{flight.fareLast.arrivalDate | date:"dd/MM/yy HH:mm" }}
-    </h5>
-    <h4>{{priceOfFlight(flight)}}€</h4>
-  </p-card>
+  <p-accordion *ngIf="flight as Flight">
+    <p-accordionTab>
+      <ng-template pTemplate="header">
+        <div class="flight-header">
+          <div class="flight-header-left">
+            <p class="flight-header-name">{{flight.middleAirport?.name || 'diretto'}}
+              <span class="flight-header-time">{{timeOfFlightHours(flight) | number: '0.1-1' }}h</span>
+            </p>
+            <p class="flight-header-date">{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} -
+              {{flight.fareLast.arrivalDate |
+              date:"dd/MM HH:mm" }}</p>
+          </div>
+          <div class="flight-header-right">
+            <p class="flight-header-price">{{priceOfFlight(flight) | number: '0.2-2' }}€</p>
+          </div>
+        </div>
+      </ng-template>
+      <div class="flight-details">
+        <div class="flight-details-left">
+          <p>{{flight.fareFirst.startAirport?.name}} - {{flight.fareFirst.endAirport?.name}}</p>
+          <p>{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareFirst.arrivalDate |
+            date:"dd/MM HH:mm" }}</p>
+          <p>{{durationOfFare(flight.fareFirst)}}</p>
+          <p>{{flight.fareFirst.price.value}}€</p>
+        </div>
+        @if(!flight.direct){
+        <div class="flight-details-right">
+          <p>{{flight.fareLast.startAirport?.name}} - {{flight.fareLast.endAirport?.name}}</p>
+          <p>{{flight.fareLast.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareLast.arrivalDate |
+            date:"dd/MM HH:mm" }}</p>
+          <p>{{durationOfFare(flight.fareLast)}}</p>
+          <p>{{flight.fareLast.price.value}}€</p>
+        </div>
+        }
+      </div>
+    </p-accordionTab>
+  </p-accordion>
 </ng-template>

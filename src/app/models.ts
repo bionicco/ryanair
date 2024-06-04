@@ -73,3 +73,10 @@ export type Flight = {
     fareFirst: Fare,
     fareLast: Fare,
 }
+
+export enum SortBy {
+    PRICE = 'Prezzo',
+    DURATION = 'Durata',
+    // WAITING_TIME = 'Durata scalo',
+    DATE = 'Data'
+}
