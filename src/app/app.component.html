@@ -143,9 +143,10 @@
       <ng-template pTemplate="header">
         <div class="flight-header">
           <div class="flight-header-left">
-            <p class="flight-header-name">{{flight.middleAirport?.name || 'diretto'}}
-              <span class="flight-header-time">{{timeOfFlightHours(flight) | time }}</span>
-            </p>
+            <div class="flight-header-name">
+              <p>{{flight.middleAirport?.name || 'diretto'}} </p>
+              <p class="flight-header-time">{{timeOfFlightHours(flight) | time }}</p>
+            </div>
             <p class="flight-header-date">{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} -
               {{flight.fareLast.arrivalDate |
               date:"dd/MM HH:mm" }}</p>

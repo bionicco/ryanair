@@ -34,19 +34,22 @@
     gap: 10px;
 }
 
-p.flight-header-date {
+.flight-header-date {
     font-size: 0.9em;
 }
 
-p.flight-header-name {
+.flight-header-name {
     font-size: 1.1em;
+    display: flex;
+    align-items: center;
 }
 
-span.flight-header-time {
+.flight-header-time {
+    padding-left: 5px;
     font-size: 1.3em;
 }
 
-p.flight-header-price {
+.flight-header-price {
     font-size: 1.4em;
 }
 
