@@ -4,6 +4,12 @@
     margin: 0 auto;
 }
 
+.logo {
+    background: -webkit-linear-gradient(0deg, rgba(8, 4, 89, 1) 0%, rgba(9, 9, 121, 1) 28%, rgba(233, 230, 1, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .ryan-button {
     margin-top: 25px;
     margin-bottom: 15px;
@@ -57,4 +63,9 @@
     display: flex;
     justify-content: space-between;
     gap: 10px;
+}
+
+.spacer {
+    margin-top: 20px;
+    height: 20px;
 }
