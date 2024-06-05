@@ -1,27 +1,20 @@
 # Ryanair
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.2.
+This is a simple tool to find the Ryanair flights from one city to another. It uses Ryanair's API to get the prices and the routes.
+It's been made because it's not easy with Ryanair's website to find a connection between two airports that aren't directly connected and with this tool you can easily create an itinerary with multiple flights.
 
-## Development server
+## Technologies
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+This is an Angular project, using PrimeNG for the UI components.
+It's a fast written project, so it's not perfect (well..the code is pretty ugly), but it works.
+The UI is in italian, but it's easy to change it.Ask me if you need  translation and I can insert it in the project
 
-## Code scaffolding
+## API
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+The use of Ryanair API isn't documented, (and I'm not sure if it's allowed), so maybe it will stop working in the future.
+Because it's not documented, I had to do some reverse engineering to understand how it works, so it's not perfect and may it will exclude some flights.
+If someone knows how to use API in a better way, please let me know.
 
-## Build
+## Installation and use
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Just clone the repository , run `npm install` and test it with `ng serve`.
