@@ -57,18 +57,15 @@ export class RyanairService {
     const returnFares: Fare[] = [];
     while ((year1 * 100 + month1) <= (year2 * 100 + month2)) {
       const fares = await this.getFaresMonth(origin, destination, year1, month1, currency);
-      console.log("------- ~ RyanairService ~ getFares ~ fares:", fares);
       if (fares?.length) {
         returnFares.push(...fares);
       }
-      console.log("------- ~ RyanairService ~ getFares ~ returnFares:", returnFares);
       month1++;
       if (month1 > 11) {
         month1 = 0;
         year1++;
       }
     }
-    console.log("------- ~ RyanairService ~ getFares ~ returnFares:", returnFares);
     return returnFares;
   }
 
