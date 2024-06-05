@@ -49,7 +49,31 @@ export class RyanairService {
     return await resp.json();
   }
 
-  public async getFares(origin: string, destination: string, date: Date, currency: string = 'EUR'): Promise<Fare[]> {
+  public async getFares(origin: string, destination: string, dateStart: Date, dateEnd: Date, currency: string = 'EUR'): Promise<Fare[]> {
+    let month1 = new Date(dateStart).getMonth();
+    const month2 = new Date(dateEnd).getMonth();
+    let year1 = new Date(dateStart).getFullYear();
+    const year2 = new Date(dateEnd).getFullYear();
+    const returnFares: Fare[] = [];
+    while ((year1 * 100 + month1) <= (year2 * 100 + month2)) {
+      const fares = await this.getFaresMonth(origin, destination, year1, month1, currency);
+      console.log("------- ~ RyanairService ~ getFares ~ fares:", fares);
+      if (fares?.length) {
+        returnFares.push(...fares);
+      }
+      console.log("------- ~ RyanairService ~ getFares ~ returnFares:", returnFares);
+      month1++;
+      if (month1 > 11) {
+        month1 = 0;
+        year1++;
+      }
+    }
+    console.log("------- ~ RyanairService ~ getFares ~ returnFares:", returnFares);
+    return returnFares;
+  }
+
+  public async getFaresMonth(origin: string, destination: string, year1: number, month1: number, currency: string = 'EUR'): Promise<Fare[]> {
+    const date = new Date(year1, month1, 15);
     const departDate = date.toISOString().split('T')[0];
     const resp = await fetch(`https://www.ryanair.com/api/farfnd/v4/oneWayFares/${origin}/${destination}/cheapestPerDay?outboundMonthOfDate=${departDate}&currency=${currency}`);
     return (await resp.json()).outbound.fares;
@@ -69,7 +93,7 @@ export class RyanairService {
   public async getFlights(origin: Airport, destination: Airport, commonDestinations: Airport[], dateInterval: Date[]): Promise<Flight[]> {
     const flights: Flight[] = [];
     if (!commonDestinations?.length) {
-      const fares = await this.getFares(origin.code, destination.code, dateInterval[0]);
+      const fares = await this.getFares(origin.code, destination.code, dateInterval[0], dateInterval[1]);
       for (const fare of fares) {
         if (fare.soldOut || fare.unavailable) continue;
         if (fare.departureDate < dateInterval[0] || fare.departureDate > dateInterval[1]) continue;
@@ -84,8 +108,8 @@ export class RyanairService {
       }
     } else {
       for (const commonDestination of commonDestinations) {
-        const faresStart = await this.getFares(origin.code, commonDestination.code, dateInterval[0]);
-        const faresEnd = await this.getFares(commonDestination.code, destination.code, dateInterval[0]);
+        const faresStart = await this.getFares(origin.code, commonDestination.code, dateInterval[0], dateInterval[1]);
+        const faresEnd = await this.getFares(commonDestination.code, destination.code, dateInterval[0], dateInterval[1]);
         for (const fareStart of faresStart) {
           if (fareStart.soldOut || fareStart.unavailable) continue;
           if (new Date(fareStart.departureDate) < dateInterval[0] || new Date(fareStart.departureDate) > dateInterval[1]) continue;
