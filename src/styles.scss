@@ -12,3 +12,15 @@
 //         /* CSS to Reset */
 //     }
 // }
+
+body {
+    font-family: "Hind", "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    margin: 0;
+    padding: 0;
+    background-image: url("/background.jpg");
+    background-repeat: repeat;
+    background-color: #cccccc;
+}

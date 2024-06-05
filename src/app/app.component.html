@@ -1,182 +1,198 @@
 <div class="main">
-  <div class="origin-selector">
-    <h2>Aeroporto di partenza</h2>
+  <div class="header">
+    <h1 class="logo">Ryanair&nbsp;find</h1>
+    <p class="padding-horizontal">Questo è un motore di ricerca per i voli ryanair che permette di trovare i
+      collegamenti tra 2 aeroporti anche se
+      prevedono uno scalo intermedio</p>
+    <h3>Seleziona gli aeroporti </h3>
+    <div class="origin-selector">
+      <h2>Aeroporto di partenza</h2>
 
-    <p-dropdown [options]="airports " [(ngModel)]="origin" optionLabel="name" [filter]="true" filterBy="name"
-      [showClear]="true" placeholder="Seleziona aeroporto" (ngModelChange)="changeOriginOrDestination()">
-    </p-dropdown>
+      <p-dropdown [options]="airports " [(ngModel)]="origin" optionLabel="name" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Seleziona aeroporto" (ngModelChange)="changeOriginOrDestination()">
+      </p-dropdown>
 
-  </div>
-  <div class="destination-selector">
-
-    <h2>Aeroporto d'arrivo</h2>
-
-    <p-dropdown [options]="airports " [(ngModel)]="destination" optionLabel="name" [filter]="true" filterBy="name"
-      [showClear]="true" placeholder="Seleziona aeroporto" (ngModelChange)="changeOriginOrDestination()">
-    </p-dropdown>
-
-    <div class="aoutes-button ryan-button">
-      <p-button class="ryan-button" label="conferma" [disabled]="!(origin && destination)"
-        (click)="confirmAirports()" />
     </div>
+    <div class="destination-selector">
 
-  </div>
-  @if(connectionVerified && origin && destination && origin.code != destination.code){
-  <div class="common-routes">
-    @if(connected){
-    <h2>I due aeroporti sono direttamente connessi </h2>
-    }@else{
-    @if(commonDestinations.length > 0){
-    <h2>I due aeroporti sono connessi tramite questi scali</h2>
-    @for(airport of commonDestinations; track airport.code){
-    <p-toggleButton class="common-routes-button" [(ngModel)]="airport.selected"
-      (ngModelChange)="changeSelectedDestinations()" [onLabel]="airport.name" [offLabel]="airport.name" />
-    }
-    <p>Si possono deselezionare gli aeroporti attraverso cui non si intende transitare</p>
-    }@else {
-    <h2>Non ci sono scali comuni tra i due aeroporti</h2>
-    }
+      <h2>Aeroporto d'arrivo</h2>
 
-    }
+      <p-dropdown [options]="airports " [(ngModel)]="destination" optionLabel="name" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Seleziona aeroporto" (ngModelChange)="changeOriginOrDestination()">
+      </p-dropdown>
 
-  </div>
-  @if(connected || selectedDestinations.length > 0){
-  <div class="dates-selector">
-    <h2>Seleziona il periodo possibile per la partenza e per il ritorno</h2>
-    <h3>Partenza</h3>
-    <p-calendar [(ngModel)]="startDate" selectionMode="range" />
-    <div class="one-way-selector">
-      <p-checkbox [(ngModel)]="oneWay" [binary]="true" inputId="binary" /><label>solo andata</label>
+      <div class="aoutes-button ryan-button">
+        <p-button class="ryan-button" label="conferma" [disabled]="!(origin && destination)"
+          (click)="confirmAirports()" />
+      </div>
+
     </div>
-    @if(!oneWay){
-    <h3>Ritorno</h3>
-    <p-calendar [(ngModel)]="endDate" selectionMode="range" />}
-  </div>
-  <div class="search-button ryan-button">
-    <p-button class="ryan-button" label="cerca voli" [disabled]="!(startDate && (endDate || oneWay)) || loading"
-      (click)="searchFlights()" />
-    @if(loading){
-    <p-progressBar mode="indeterminate" [style]="{ height: '6px' }" />
-    }
-  </div>
-  @if(searched){
-  <div class="search-results">
-    <h2>Risultati della ricerca</h2>
-
-    <p-accordion>
-      <p-accordionTab header="Filtri - {{activeFilters}}">
-        <div class="filters">
-          <h3>Prezzo massimo <b>{{filterMaxPrice}}</b> €</h3>
-          <p-slider [(ngModel)]="filterMaxPrice" [min]="50" [max]="1500" [step]="10" [style]="{ width: '100%' }"
-            (onSlideEnd)="filterFlights()" />
-          <h3>Durata dello scalo tra <b>{{filterWaitTime[0]}}</b> e <b>{{filterWaitTime[1]}}</b> ore</h3>
-          <p-slider [(ngModel)]="filterWaitTime" [range]="true" [min]="0" [max]="24" [step]="0.5"
-            [style]="{ width: '100%' }" (onSlideEnd)="filterFlights()" />
-          <h3>Durata massima <b>{{filterLength}}</b> ore</h3>
-          <p-slider [(ngModel)]="filterLength" [min]="0" [max]="48" [step]="1" [style]="{ width: '100%' }"
-            (onSlideEnd)="filterFlights()" />
-          <h3>Ordina per</h3>
-          <p-selectButton [options]="sortByOptions" [(ngModel)]="sortBy" (ngModelChange)="filterFlights()" />
-        </div>
-      </p-accordionTab>
-    </p-accordion>
-
-    <p-tabView>
-      <p-tabPanel header="Andata ({{filteredGoFlights.length}})">
-        @if(goFlights.length == 0){
-        <div class="nodata">
-          <h3>Nessun volo esistente in queste date</h3>
-        </div>
-        }@else {
-        @if(filteredGoFlights.length == 0){
-        <div class="nodata">
-          <h3>Tra i voli esistenti in questo periodo nessuno soddisfa i criteri impostati nel filtro</h3>
-        </div>
-        }
-        }
-        @for(flight of filteredGoFlights; track flight){
-        <ng-container *ngTemplateOutlet="searchResultsPanel;context:{flight:flight}"></ng-container>
-        }
-
-      </p-tabPanel>
-      @if(!oneWay){
-      <p-tabPanel class="search-results-panel" header="Ritorno ({{filteredReturnFlights.length}})">
-        @if(returnFlights.length == 0){
-        <div class="nodata">
-          <h3>Nessun volo esistente in queste date</h3>
-        </div>
-        }@else {
-        @if(filteredReturnFlights.length == 0){
-        <div class="nodata">
-          <h3>Tra i voli esistenti in questo periodo nessuno soddisfa i criteri impostati nel filtro</h3>
-        </div>
-        }
-        }
-        @for(flight of filteredReturnFlights; track flight){
-        <ng-container *ngTemplateOutlet="searchResultsPanel;context:{flight:flight}"></ng-container>
-        }
-
-      </p-tabPanel>
+    @if(connectionVerified && origin && destination && origin.code != destination.code){
+    <div class="common-routes">
+      @if(connected){
+      <h3>I due aeroporti sono direttamente connessi </h3>
+      }@else{
+      @if(commonDestinations.length > 0){
+      <h2>I due aeroporti sono connessi tramite questi scali</h2>
+      @for(airport of commonDestinations; track airport.code){
+      <p-toggleButton class="common-routes-button" [(ngModel)]="airport.selected"
+        (ngModelChange)="changeSelectedDestinations()" [onLabel]="airport.name" [offLabel]="airport.name" />
       }
-    </p-tabView>
+      <p>Si possono deselezionare gli aeroporti attraverso cui non si intende transitare</p>
+      }@else {
+      <h2>Non ci sono scali comuni tra i due aeroporti</h2>
+      }
 
+      }
+
+    </div>
+    @if(connected || selectedDestinations.length > 0){
+    <div class="dates-selector">
+      <h2>Seleziona gli <u>intervalli</u> per la partenza e per il ritorno</h2>
+      <h3>Partenza</h3>
+      <p-calendar [(ngModel)]="startDate" selectionMode="range" dateFormat="dd/mm/yy" />
+      <div class="one-way-selector">
+        <p-checkbox [(ngModel)]="oneWay" [binary]="true" inputId="binary" /><label> solo andata</label>
+      </div>
+      @if(!oneWay){
+      <h3>Ritorno</h3>
+      <p-calendar [(ngModel)]="endDate" selectionMode="range" dateFormat="dd/mm/yy" />}
+    </div>
+    <div class="search-button ryan-button">
+      <p-button class="ryan-button" label="cerca voli" [disabled]="!(startDate && (endDate || oneWay)) || loading"
+        (click)="searchFlights()" />
+      @if(!searched){
+      <div class="spacer"></div>}
+      @if(loading){
+      <p-progressBar mode="indeterminate" [style]="{ height: '6px' }" />
+      <div class="spacer"></div>
+      }
+    </div>
+    @if(searched){
+    <div class="search-results">
+      <h2>Risultati della ricerca</h2>
+
+      <p-accordion>
+        <p-accordionTab header="Filtri - {{activeFilters}}">
+          <div class="filters">
+            <h3>Prezzo massimo <b>{{filterMaxPrice}}</b> €</h3>
+            <p-slider [(ngModel)]="filterMaxPrice" [min]="50" [max]="1500" [step]="10" [style]="{ width: '100%' }"
+              (onSlideEnd)="filterFlights()" />
+            <h3>Durata dello scalo tra <b>{{filterWaitTime[0]}}</b> e <b>{{filterWaitTime[1]}}</b> ore</h3>
+            <p-slider [(ngModel)]="filterWaitTime" [range]="true" [min]="0" [max]="24" [step]="0.5"
+              [style]="{ width: '100%' }" (onSlideEnd)="filterFlights()" />
+            <h3>Durata massima <b>{{filterLength}}</b> ore</h3>
+            <p-slider [(ngModel)]="filterLength" [min]="0" [max]="48" [step]="1" [style]="{ width: '100%' }"
+              (onSlideEnd)="filterFlights()" />
+            <h3>Ordina per</h3>
+            <p-selectButton [options]="sortByOptions" [(ngModel)]="sortBy" (ngModelChange)="filterFlights()" />
+          </div>
+        </p-accordionTab>
+      </p-accordion>
+
+      <p-tabView>
+        <p-tabPanel header="Andata ({{filteredGoFlights.length}})">
+          @if(goFlights.length == 0){
+          <div class="nodata">
+            <h3>Nessun volo esistente in queste date</h3>
+          </div>
+          }@else {
+          @if(filteredGoFlights.length == 0){
+          <div class="nodata">
+            <h3>Tra i voli esistenti in questo periodo nessuno soddisfa i criteri impostati nel filtro</h3>
+          </div>
+          }
+          }
+          @for(flight of filteredGoFlights; track flight){
+          <ng-container *ngTemplateOutlet="searchResultsPanel;context:{flight:flight}"></ng-container>
+          }
+
+        </p-tabPanel>
+        @if(!oneWay){
+        <p-tabPanel class="search-results-panel" header="Ritorno ({{filteredReturnFlights.length}})">
+          @if(returnFlights.length == 0){
+          <div class="nodata">
+            <h3>Nessun volo esistente in queste date</h3>
+          </div>
+          }@else {
+          @if(filteredReturnFlights.length == 0){
+          <div class="nodata">
+            <h3>Tra i voli esistenti in questo periodo nessuno soddisfa i criteri impostati nel filtro</h3>
+          </div>
+          }
+          }
+          @for(flight of filteredReturnFlights; track flight){
+          <ng-container *ngTemplateOutlet="searchResultsPanel;context:{flight:flight}"></ng-container>
+          }
+
+        </p-tabPanel>
+        }
+      </p-tabView>
+
+
+
+    </div>
+    <p-panel class="notes" header="Note">
+      <p>
+        I voli presenti sono quelli selezionati da ryanair come più economici per il periodo selezionato. E non vengono
+        mostrati quelli completi o non disponibili
+      </p>
+      <p>
+        Il progetto è disponibile su github a questo indirizzo:
+        <a href="https://github.com/bionicco/ryanair"> https://github.com/bionicco/ryanair</a>
+      </p>
+    </p-panel>
+    }
+    }
+    }
 
 
   </div>
-  <p-panel class="notes" header="Note">
-    <p>
-      I voli presenti sono quelli selezionati da ryanair come più economici per il periodo selezionato. E non vengono
-      mostrati quelli completi o non disponibili
-    </p>
-    <p>
-      Il progetto è disponibile su github a questo indirizzo:
-      <a href="https://github.com/bionicco/ryanair"> https://github.com/bionicco/ryanair</a>
-    </p>
-  </p-panel>
-  }
-  }
-  }
 
+  <ng-template #searchResultsPanel let-flight="flight">
 
-</div>
-
-<ng-template #searchResultsPanel let-flight="flight">
-
-  <p-accordion *ngIf="flight as Flight">
-    <p-accordionTab>
-      <ng-template pTemplate="header">
-        <div class="flight-header">
-          <div class="flight-header-left">
-            <p class="flight-header-name">{{flight.middleAirport?.name || 'diretto'}}
-              <span class="flight-header-time">{{timeOfFlightHours(flight) | number: '0.1-1' }}h</span>
+    <p-accordion *ngIf="flight as Flight">
+      <p-accordionTab>
+        <ng-template pTemplate="header">
+          <div class="flight-header">
+            <div class="flight-header-left">
+              <div class="flight-header-name">
+                <p>{{flight.middleAirport?.name || 'diretto'}} </p>
+                <p class="flight-header-time">{{timeOfFlightHours(flight) | time }}</p>
+              </div>
+              <p class="flight-header-date">{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} -
+                {{flight.fareLast.arrivalDate |
+                date:"dd/MM HH:mm" }}</p>
+            </div>
+            <div class="flight-header-right">
+              <p class="flight-header-price">{{priceOfFlight(flight) | number: '0.2-2' }}€</p>
+            </div>
+          </div>
+        </ng-template>
+        <div class="flight-details">
+          <div class="flight-details-left">
+            <p>{{flight.startAirport?.name}} - {{flight.direct ? flight.endAirport?.name : flight.middleAirport?.name}}
             </p>
-            <p class="flight-header-date">{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} -
-              {{flight.fareLast.arrivalDate |
+            <p>{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareFirst.arrivalDate |
               date:"dd/MM HH:mm" }}</p>
+            <p>{{durationOfFare(flight.fareFirst)}}</p>
+            <p>{{flight.fareFirst.price.value}}€</p>
           </div>
-          <div class="flight-header-right">
-            <p class="flight-header-price">{{priceOfFlight(flight) | number: '0.2-2' }}€</p>
+          @if(!flight.direct){
+          <div class="flight-details-right">
+            <p>{{flight.middleAirport?.name}} - {{flight.endAirport?.name}}</p>
+            <p>{{flight.fareLast.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareLast.arrivalDate |
+              date:"dd/MM HH:mm" }}</p>
+            <p>{{durationOfFare(flight.fareLast)}}</p>
+            <p>{{flight.fareLast.price.value}}€</p>
           </div>
-        </div>
-      </ng-template>
-      <div class="flight-details">
-        <div class="flight-details-left">
-          <p>{{flight.fareFirst.startAirport?.name}} - {{flight.fareFirst.endAirport?.name}}</p>
-          <p>{{flight.fareFirst.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareFirst.arrivalDate |
-            date:"dd/MM HH:mm" }}</p>
-          <p>{{durationOfFare(flight.fareFirst)}}</p>
-          <p>{{flight.fareFirst.price.value}}€</p>
+          }
         </div>
         @if(!flight.direct){
-        <div class="flight-details-right">
-          <p>{{flight.fareLast.startAirport?.name}} - {{flight.fareLast.endAirport?.name}}</p>
-          <p>{{flight.fareLast.departureDate | date:"dd/MM HH:mm" }} - {{flight.fareLast.arrivalDate |
-            date:"dd/MM HH:mm" }}</p>
-          <p>{{durationOfFare(flight.fareLast)}}</p>
-          <p>{{flight.fareLast.price.value}}€</p>
+        <div class="flight-details-wait">
+          <p>Tempo di attesa allo scalo: {{timeOfWaitHours(flight) | time }}</p>
         </div>
         }
-      </div>
-    </p-accordionTab>
-  </p-accordion>
-</ng-template>
+      </p-accordionTab>
+    </p-accordion>
+  </ng-template>
