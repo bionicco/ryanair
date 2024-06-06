@@ -93,7 +93,7 @@ export class RyanairService {
       const fares = await this.getFares(origin.code, destination.code, dateInterval[0], dateInterval[1]);
       for (const fare of fares) {
         if (fare.soldOut || fare.unavailable) continue;
-        if (fare.departureDate < dateInterval[0] || fare.departureDate > dateInterval[1]) continue;
+        if (new Date(fare.departureDate) < dateInterval[0] || new Date(fare.departureDate) > dateInterval[1]) continue;
         flights.push({
           startAirport: origin,
           middleAirport: undefined,

@@ -1,6 +1,6 @@
 <div class="main">
   <div class="header">
-    <h1 class="logo">Ryanair&nbsp;find</h1>
+    <h1 class="logo">Ryanair&nbsp;finder</h1>
     <p class="padding-horizontal">Questo è un motore di ricerca per i voli ryanair che permette di trovare i
       collegamenti tra 2 aeroporti anche se
       prevedono uno scalo intermedio</p>
@@ -50,13 +50,16 @@
     <div class="dates-selector">
       <h2>Seleziona gli <u>intervalli</u> per la partenza e per il ritorno</h2>
       <h3>Partenza</h3>
-      <p-calendar [(ngModel)]="startDate" selectionMode="range" dateFormat="dd/mm/yy" />
+      <p-calendar (ngModelChange)="changeDatesOrOneway()" [(ngModel)]="startDate" selectionMode="range"
+        dateFormat="dd/mm/yy" />
       <div class="one-way-selector">
-        <p-checkbox [(ngModel)]="oneWay" [binary]="true" inputId="binary" /><label> solo andata</label>
+        <p-checkbox (ngModelChange)="changeDatesOrOneway()" [(ngModel)]="oneWay" [binary]="true"
+          inputId="binary" /><label> solo andata</label>
       </div>
       @if(!oneWay){
       <h3>Ritorno</h3>
-      <p-calendar [(ngModel)]="endDate" selectionMode="range" dateFormat="dd/mm/yy" />}
+      <p-calendar (ngModelChange)="changeDatesOrOneway()" [(ngModel)]="endDate" selectionMode="range"
+        dateFormat="dd/mm/yy" />}
     </div>
     <div class="search-button ryan-button">
       <p-button class="ryan-button" label="cerca voli" [disabled]="!(startDate && (endDate || oneWay)) || loading"
@@ -79,7 +82,7 @@
             <p-slider [(ngModel)]="filterMaxPrice" [min]="50" [max]="1500" [step]="10" [style]="{ width: '100%' }"
               (onSlideEnd)="filterFlights()" />
             <h3>Durata dello scalo tra <b>{{filterWaitTime[0]}}</b> e <b>{{filterWaitTime[1]}}</b> ore</h3>
-            <p-slider [(ngModel)]="filterWaitTime" [range]="true" [min]="0" [max]="24" [step]="0.5"
+            <p-slider [(ngModel)]="filterWaitTime" [range]="true" [min]="0" [max]="48" [step]="0.5"
               [style]="{ width: '100%' }" (onSlideEnd)="filterFlights()" />
             <h3>Durata massima <b>{{filterLength}}</b> ore</h3>
             <p-slider [(ngModel)]="filterLength" [min]="0" [max]="48" [step]="1" [style]="{ width: '100%' }"
@@ -133,9 +136,9 @@
 
     </div>
     <p-panel class="notes" header="Note">
-      <p>
-        I voli presenti sono quelli selezionati da ryanair come più economici per il periodo selezionato. E non vengono
-        mostrati quelli completi o non disponibili
+      <p> I voli utilizzati per questi calcoli sono quelli più economici e non completi di ogni singola giornata. </p>
+      <p> Per questo se su una tratta ci sono più voli in una giornata, verrà utilizzato solo il più economico e quindi
+        non essere mostrate tutte le possibili soluzioni
       </p>
       <p>
         <a href="https://github.com/bionicco/ryanair"> https://github.com/bionicco/ryanair</a>

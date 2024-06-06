@@ -80,3 +80,16 @@ export enum SortBy {
     // WAITING_TIME = 'Durata scalo',
     DATE = 'Data'
 }
+
+export type Filter = {
+    length: number,
+    waitTime: [number, number],
+    maxPrice: number,
+    sortBy: SortBy,
+}
+
+export type TimeTable = {
+    departure: Date[],
+    arrival: Date[],
+    oneWay: boolean
+}

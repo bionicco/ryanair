@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { RyanairService } from './ryanair.service';
-import { Airport, AirportSelectable, Fare, Flight, SortBy } from './models';
+import { Airport, AirportSelectable, Fare, Filter, Flight, SortBy, TimeTable } from './models';
 import { PrimeNGConfig } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
@@ -22,10 +22,17 @@ import { SliderModule } from 'primeng/slider';
 import { TabViewModule } from 'primeng/tabview';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TimePipe } from './time.pipe';
+import { StorageService } from './storage.service';
 
 
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
+
+
+const FILTER_KEY = "ryan-filter";
+const DESTINATION_KEY = "ryan-destinations";
+const ORIGIN_KEY = "ryan-origin";
+const TIMETABLE_KEY = "ryan-timetable";
 
 
 @Component({
@@ -95,19 +102,54 @@ export class AppComponent implements OnInit {
 
   constructor(
     private ryanairService: RyanairService,
-    private primengConfig: PrimeNGConfig
+    private primengConfig: PrimeNGConfig,
+    private storageService: StorageService
   ) {
   }
 
   async ngOnInit() {
     this.airports = await this.ryanairService.getAirports() || [];
     this.primengConfig.ripple = true;
+
+
+    const origin = this.storageService.getItem(ORIGIN_KEY)
+    if (origin) {
+      this.origin = JSON.parse(origin);
+    }
+
+    const destination = this.storageService.getItem(DESTINATION_KEY)
+    if (destination) {
+      this.destination = JSON.parse(destination);
+    }
+
+    const filter = this.storageService.getItem(FILTER_KEY)
+    if (filter) {
+      const { length, waitTime, maxPrice, sortBy } = JSON.parse(filter);
+      this.filterLength = length;
+      this.filterWaitTime = waitTime;
+      this.filterMaxPrice = maxPrice;
+      this.sortBy = sortBy;
+    }
+
+    const timetable = this.storageService.getItem(TIMETABLE_KEY)
+    if (timetable) {
+      const { departure, arrival, oneWay } = JSON.parse(timetable);
+      this.startDate = departure.map((x: any) => new Date(x)) || [];
+      this.endDate = arrival.map((x: any) => new Date(x)) || [];
+      this.oneWay = oneWay;
+
+    }
+
+
   }
 
   changeOriginOrDestination() {
     this.connected = false;
     this.connectionVerified = false;
     this.searched = false;
+
+    this.storageService.setItem(ORIGIN_KEY, JSON.stringify(this.origin));
+    this.storageService.setItem(DESTINATION_KEY, JSON.stringify(this.destination));
   }
 
   async confirmAirports() {
@@ -123,8 +165,10 @@ export class AppComponent implements OnInit {
     if (this.startDate?.length && (this.endDate?.length || this.oneWay)) {
       this.loading = true;
       this.goFlights = await this.ryanairService.getFlights(this.origin, this.destination, this.connected ? [] : this.selectedDestinations, this.startDate);
+      console.log("------- ~ AppComponent ~ searchFlights ~ this.goFlights:", this.goFlights);
       if (!this.oneWay && this.endDate?.length) {
         this.returnFlights = await this.ryanairService.getFlights(this.destination, this.origin, this.connected ? [] : this.selectedDestinations, this.endDate);
+        console.log("------- ~ AppComponent ~ searchFlights ~ this.returnFlights :", this.returnFlights);
       }
       this.filterFlights();
       this.loading = false;
@@ -134,6 +178,16 @@ export class AppComponent implements OnInit {
 
   changeSelectedDestinations() {
     this.selectedDestinations = this.commonDestinations.filter(a => a.selected);
+  }
+
+  changeDatesOrOneway() {
+    this.searched = false;
+    this.storageService.setItem(TIMETABLE_KEY, JSON.stringify({
+      departure: this.startDate,
+      arrival: this.endDate,
+      oneWay: this.oneWay
+    } as TimeTable));
+
   }
 
   priceOfFlight(flight: Flight): number {
@@ -159,6 +213,15 @@ export class AppComponent implements OnInit {
     this.filteredGoFlights = this.applyFilters(this.goFlights);
     if (this.oneWay) return;
     this.filteredReturnFlights = this.applyFilters(this.returnFlights);
+
+    this.storageService.setItem(FILTER_KEY, JSON.stringify(
+      {
+        length: this.filterLength,
+        waitTime: this.filterWaitTime,
+        maxPrice: this.filterMaxPrice,
+        sortBy: this.sortBy
+      } as Filter
+    ));
   }
 
   applyFilters(flights: Flight[]): Flight[] {
