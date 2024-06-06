@@ -87,13 +87,21 @@ export class RyanairService {
     return destinations.some(d => d.code === destination.code);
   }
 
+  private isValidDate(dateString: string | Date, interval: Date[]): boolean {
+    const date = new Date(dateString);
+    return date >= interval[0] && date.getTime() <= (interval[1].getTime() + ONE_DAY);
+  }
+
+  private isSoldOut(fare: Fare): boolean {
+    return fare.soldOut || fare.unavailable;
+  }
+
   public async getFlights(origin: Airport, destination: Airport, commonDestinations: Airport[], dateInterval: Date[]): Promise<Flight[]> {
     const flights: Flight[] = [];
     if (!commonDestinations?.length) {
       const fares = await this.getFares(origin.code, destination.code, dateInterval[0], dateInterval[1]);
       for (const fare of fares) {
-        if (fare.soldOut || fare.unavailable) continue;
-        if (new Date(fare.departureDate) < dateInterval[0] || new Date(fare.departureDate) > dateInterval[1]) continue;
+        if (this.isSoldOut(fare) || !this.isValidDate(fare.departureDate, dateInterval)) continue;
         flights.push({
           startAirport: origin,
           middleAirport: undefined,
@@ -108,11 +116,9 @@ export class RyanairService {
         const faresStart = await this.getFares(origin.code, commonDestination.code, dateInterval[0], dateInterval[1]);
         const faresEnd = await this.getFares(commonDestination.code, destination.code, dateInterval[0], dateInterval[1]);
         for (const fareStart of faresStart) {
-          if (fareStart.soldOut || fareStart.unavailable) continue;
-          if (new Date(fareStart.departureDate) < dateInterval[0] || new Date(fareStart.departureDate) > dateInterval[1]) continue;
+          if (this.isSoldOut(fareStart) || !this.isValidDate(fareStart.departureDate, dateInterval)) continue;
           for (const fareEnd of faresEnd) {
-            if (fareEnd.soldOut || fareEnd.unavailable) continue;
-            if (new Date(fareEnd.departureDate) < dateInterval[0] || new Date(fareEnd.departureDate) > dateInterval[1]) continue;
+            if (this.isSoldOut(fareEnd) || !this.isValidDate(fareEnd.departureDate, dateInterval)) continue;
             if (new Date(fareEnd.departureDate) < new Date(fareStart.arrivalDate)) continue;
             flights.push({
               startAirport: origin,
